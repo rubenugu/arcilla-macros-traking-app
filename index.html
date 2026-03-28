@@ -132,6 +132,46 @@
     .screen { display: flex; flex-direction: column; min-height: 100dvh; }
     .hidden { display: none !important; }
 
+    /* ===== WELCOME ===== */
+    #screen-welcome {
+      align-items: center; justify-content: center;
+      padding: 24px var(--sp);
+      background: var(--bg);
+    }
+    .welcome-card {
+      width: 100%; max-width: 400px;
+      padding: 44px 28px 36px;
+      text-align: center;
+    }
+    .welcome-logo {
+      font-family: var(--font-h); font-size: 42px; font-weight: 700;
+      margin-bottom: 10px; color: var(--text);
+    }
+    .welcome-logo span { color: var(--green-mid); }
+    .welcome-tagline {
+      color: var(--text-muted); font-size: 14px; font-weight: 500;
+      margin-bottom: 36px; letter-spacing: 0.3px;
+    }
+    .welcome-pot {
+      margin: 0 auto 36px;
+      width: 88px; height: 88px;
+      opacity: 0.85;
+    }
+    .welcome-btn-group {
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .welcome-or {
+      color: var(--text-dim); font-size: 12px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      position: relative;
+    }
+    .welcome-or::before, .welcome-or::after {
+      content: ''; position: absolute; top: 50%;
+      width: 38%; height: 1px; background: var(--border);
+    }
+    .welcome-or::before { left: 0; }
+    .welcome-or::after { right: 0; }
+
     /* ===== ONBOARDING ===== */
     #screen-onboarding {
       align-items: center; justify-content: center;
@@ -434,8 +474,47 @@
 
 <div id="toast-container"></div>
 
+<!-- ==================== SCREEN: WELCOME ==================== -->
+<div id="screen-welcome" class="screen">
+  <div class="welcome-card card card-hi">
+    <div class="welcome-logo">Ar<span>cilla</span></div>
+    <div class="welcome-tagline">Moldea tu día · Gana piezas únicas</div>
+
+    <!-- Pottery wheel SVG -->
+    <svg class="welcome-pot" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- wheel base shadow -->
+      <ellipse cx="44" cy="76" rx="26" ry="5" fill="#C9B9A8" opacity="0.5"/>
+      <!-- wheel disc -->
+      <ellipse cx="44" cy="72" rx="26" ry="5" fill="#B8860B" opacity="0.4"/>
+      <ellipse cx="44" cy="72" rx="20" ry="3.5" fill="#B8860B" opacity="0.5"/>
+      <!-- pot body -->
+      <path d="M28 62 C26 52 24 42 26 34 C28 22 36 14 44 13 C52 14 60 22 62 34 C64 42 62 52 60 62 Z"
+            fill="#C4924A" opacity="0.25"/>
+      <path d="M28 62 C26 52 24 42 26 34 C28 22 36 14 44 13 C52 14 60 22 62 34 C64 42 62 52 60 62 Z"
+            stroke="#8B5E3C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- rim -->
+      <ellipse cx="44" cy="62" rx="16" ry="3.5" stroke="#8B5E3C" stroke-width="1.8" fill="#FFFDF9"/>
+      <!-- opening -->
+      <ellipse cx="44" cy="13" rx="8" ry="2.5" stroke="#8B5E3C" stroke-width="1.5" fill="#FFFDF9"/>
+      <!-- decorative lines on pot -->
+      <path d="M30 40 Q44 38 58 40" stroke="#B8860B" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.7"/>
+      <path d="M29 50 Q44 48 59 50" stroke="#B8860B" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.5"/>
+      <!-- wheel spokes -->
+      <line x1="44" y1="72" x2="44" y2="68" stroke="#8B5E3C" stroke-width="1.2" opacity="0.6"/>
+      <line x1="38" y1="73.5" x2="39.5" y2="69.5" stroke="#8B5E3C" stroke-width="1.2" opacity="0.6"/>
+      <line x1="50" y1="73.5" x2="48.5" y2="69.5" stroke="#8B5E3C" stroke-width="1.2" opacity="0.6"/>
+    </svg>
+
+    <div class="welcome-btn-group">
+      <button class="btn btn-primary" id="btn-welcome-demo">Ver la demo</button>
+      <div class="welcome-or">o</div>
+      <button class="btn btn-ghost" id="btn-welcome-fresh">Iniciar de cero</button>
+    </div>
+  </div>
+</div>
+
 <!-- ==================== SCREEN: ONBOARDING ==================== -->
-<div id="screen-onboarding" class="screen">
+<div id="screen-onboarding" class="screen hidden">
   <div class="ob-card card card-hi">
     <div class="ob-logo">Ar<span>cilla</span></div>
     <div class="ob-subtitle">Moldea tu perfil para dar forma a tus piezas del d&iacute;a</div>
@@ -486,7 +565,10 @@
       <div class="app-header-title">Ar<span>cilla</span></div>
       <div class="app-header-date" id="header-date"></div>
     </div>
-    <div class="app-header-right">
+    <div class="app-header-right" style="gap:8px;display:flex;align-items:center">
+      <button class="btn btn-ghost btn-sm hidden" id="btn-back-welcome" style="width:auto;color:var(--text-muted);font-size:12px">
+        ← Inicio
+      </button>
       <button class="btn btn-ghost btn-sm" id="btn-export-header" style="width:auto">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         CSV
@@ -1242,9 +1324,19 @@ async function fetchSuggestions(remaining) {
 }
 
 /* ===== UI HELPERS ===== */
+let isDemo = false;
+
 function showScreen(name) {
+  document.getElementById('screen-welcome').classList.toggle('hidden', name !== 'welcome');
   document.getElementById('screen-onboarding').classList.toggle('hidden', name !== 'onboarding');
   document.getElementById('screen-app').classList.toggle('hidden', name !== 'app');
+  // Show "← Inicio" only in demo mode
+  const btnBack = document.getElementById('btn-back-welcome');
+  if (btnBack) btnBack.classList.toggle('hidden', !isDemo || name !== 'app');
+}
+
+function clearAllData() {
+  Object.values(KEYS).forEach(k => localStorage.removeItem(k));
 }
 function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
 function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -2089,32 +2181,45 @@ function seedDemoData() {
 /* ===== BOOTSTRAP ===== */
 document.addEventListener('DOMContentLoaded', () => {
   seedDemoData();
+
   const profile = getProfile();
-  if (!profile) {
-    showScreen('onboarding');
-    initOnboarding();
-  } else {
+  if (profile) {
+    // Returning real user — skip welcome
+    isDemo = false;
     showScreen('app');
     attachEvents();
     initApp();
+  } else {
+    // No profile yet — show welcome choice
+    showScreen('welcome');
   }
+
+  // Welcome: Ver la demo
+  document.getElementById('btn-welcome-demo').addEventListener('click', () => {
+    isDemo = true;
+    seedDemoData(); // re-seed if cleared (idempotent)
+    showScreen('app');
+    attachEvents();
+    initApp();
+  });
+
+  // Welcome: Iniciar de cero
+  document.getElementById('btn-welcome-fresh').addEventListener('click', () => {
+    isDemo = false;
+    clearAllData();
+    showScreen('onboarding');
+    initOnboarding();
+  });
+
+  // App header: ← Inicio (demo mode only)
+  document.getElementById('btn-back-welcome').addEventListener('click', () => {
+    if (!confirm('¿Volver al inicio? Los datos de la sesión se borrarán.')) return;
+    isDemo = false;
+    clearAllData();
+    showScreen('welcome');
+  });
 });
 
-document.getElementById('btn-ob-confirm').addEventListener('click', () => {
-  // fallback
-}, { once: true });
-
-function patchOnboardingTransition() {
-  const origConfirm = document.getElementById('btn-ob-confirm');
-  origConfirm.addEventListener('click', () => {
-    setTimeout(() => {
-      if (!document.getElementById('screen-app').classList.contains('hidden')) {
-        attachEvents();
-      }
-    }, 50);
-  });
-}
-patchOnboardingTransition();
 </script>
 </body>
 </html>
