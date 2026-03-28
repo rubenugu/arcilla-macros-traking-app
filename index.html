@@ -463,6 +463,14 @@
     .ring-bg   { fill: none; stroke: var(--green-pale); stroke-width: 10; }
     .ring-fill { fill: none; stroke: var(--green-mid); stroke-width: 10; stroke-linecap: round; stroke-dasharray: 314.16 314.16; stroke-dashoffset: 314.16; transition: stroke-dashoffset 0.7s cubic-bezier(0.4,0,0.2,1), stroke 0.4s; }
 
+    /* ===== CONFIRM PANEL ===== */
+    .confirm-list { list-style: none; display: flex; flex-direction: column; gap: 6px; padding: 4px 0; }
+    .confirm-list li {
+      font-size: 14px; color: var(--text); padding: 8px 12px;
+      background: var(--surface-alt); border-radius: 8px;
+      border-left: 3px solid var(--green-mid); font-weight: 600;
+    }
+
     @media (max-width: 360px) {
       .donut-section { flex-direction: column; align-items: center; }
       .donut-side { width: 100%; }
@@ -602,6 +610,16 @@
       </div>
       <button class="btn btn-primary" id="btn-analyze">Moldear con IA</button>
       <button class="btn btn-ghost" id="btn-manual-toggle">Moldear a mano</button>
+    </div>
+
+    <!-- Confirm panel -->
+    <div id="confirm-panel" class="card input-card hidden">
+      <div class="section-title">¿Esto es lo que vas a registrar?</div>
+      <ul id="confirm-list" class="confirm-list"></ul>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button class="btn btn-ghost" id="btn-confirm-cancel" style="flex:1">Cancelar</button>
+        <button class="btn btn-primary" id="btn-confirm-ok" style="flex:1">Calcular macros</button>
+      </div>
     </div>
 
     <!-- Manual entry form -->
@@ -1269,6 +1287,45 @@ async function callClaude(body) {
   } catch (err) {
     clearTimeout(timer);
     throw err;
+  }
+}
+
+let pendingFoodText = '';
+
+function showConfirmPanel(ingredientes) {
+  const list = document.getElementById('confirm-list');
+  list.innerHTML = ingredientes.map(i => `<li>${i}</li>`).join('');
+  const panel = document.getElementById('confirm-panel');
+  panel.classList.remove('hidden');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function hideConfirmPanel() {
+  document.getElementById('confirm-panel').classList.add('hidden');
+}
+
+async function parseIngredients(text) {
+  const btn = document.getElementById('btn-analyze');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Interpretando...';
+  hideError();
+  try {
+    const data = await callClaude({ mode: 'parse', userMessage: text });
+    if (data.error === 'API_KEY_NOT_CONFIGURED') { showModal('modal-apikey'); return null; }
+    if (data.error) throw new Error(data.error);
+    return data;
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      showManualForm('La IA tardó demasiado. Ingresa los datos manualmente.');
+    } else if (!navigator.onLine) {
+      showError('Sin conexión. Verifica tu internet.');
+    } else {
+      showManualForm('Error al contactar la IA. Ingresa los datos manualmente.');
+    }
+    return null;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = THEME.text.analyzeBtn;
   }
 }
 
@@ -1963,11 +2020,25 @@ function attachEvents() {
   // Food input — clear error on type
   document.getElementById('food-input').addEventListener('input', hideError);
 
-  // Analyze button
+  // Analyze button — step 1: parse ingredients for confirmation
   document.getElementById('btn-analyze').addEventListener('click', async () => {
     const text = document.getElementById('food-input').value;
     const v = validateFood(text);
     if (!v.valid) { showError(v.msg); return; }
+
+    hideConfirmPanel();
+    const parsed = await parseIngredients(text);
+    if (!parsed || !parsed.ingredientes?.length) return;
+
+    pendingFoodText = text;
+    showConfirmPanel(parsed.ingredientes);
+  });
+
+  // Confirm OK — step 2: calculate macros
+  document.getElementById('btn-confirm-ok').addEventListener('click', async () => {
+    const text = pendingFoodText;
+    hideConfirmPanel();
+    if (!text) return;
 
     const result = await analyzeFood(text);
     if (!result) return;
@@ -1982,11 +2053,18 @@ function attachEvents() {
     const entry = createLogEntry(result, text);
     addLog(entry);
     document.getElementById('food-input').value = '';
+    pendingFoodText = '';
     renderDashboard();
     renderFoodLog();
     renderEveningAlert();
     renderCloseDayButton();
     showToast(THEME.text.toastKcal(entry.calories), 'ok');
+  });
+
+  // Confirm Cancel
+  document.getElementById('btn-confirm-cancel').addEventListener('click', () => {
+    hideConfirmPanel();
+    pendingFoodText = '';
   });
 
   // Manual toggle

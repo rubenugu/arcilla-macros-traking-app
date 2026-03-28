@@ -52,6 +52,19 @@ FORMATO DE RESPUESTA (solo JSON, sin markdown, sin texto extra):
 {"items":[{"nombre":"nombre del alimento","gramos":0,"calorias":0,"proteina":0,"carbos":0,"grasa":0,"fuente":"USDA"}],"totales":{"calorias":0,"proteina":0,"carbos":0,"grasa":0}}`;
 }
 
+function buildParsePrompt() {
+  return `Eres un parser de ingredientes en español. Extrae la lista de ingredientes con sus cantidades del texto que te dé el usuario. Responde SOLO con JSON válido, sin markdown ni texto extra:
+{"ingredientes":["cantidad nombre","cantidad nombre",...]}
+
+REGLAS:
+- Un elemento por ingrediente, sin combinar varios en uno
+- Incluye todos los ingredientes mencionados, incluso agua u otros líquidos
+- Usa unidades en español (taza, cucharada, gramo, pieza, etc.)
+- Formato preferido: "X taza(s) de avena cruda", "2 plátanos", "1 cucharada de crema de cacahuate"
+- Si no se especifica cantidad, usa "1"
+- Si el texto menciona una preparación (licuado, caldo, etc.), extrae sus componentes por separado`;
+}
+
 function buildSuggestPrompt(remaining) {
   return `Eres un asistente de nutrición en español. El usuario necesita completar sus macros del día antes de dormir.
 
@@ -88,15 +101,17 @@ module.exports = async function handler(req, res) {
 
   const { mode, userMessage, remaining } = req.body || {};
 
-  if (!mode || !['analyze', 'suggest'].includes(mode)) {
+  if (!mode || !['analyze', 'suggest', 'parse'].includes(mode)) {
     return res.status(400).json({ error: 'Modo inválido' });
   }
 
   const systemPrompt = mode === 'analyze'
     ? buildAnalyzePrompt()
+    : mode === 'parse'
+    ? buildParsePrompt()
     : buildSuggestPrompt(remaining || { calories: 0, protein: 0, carbs: 0, fat: 0 });
 
-  const messageContent = mode === 'analyze'
+  const messageContent = mode === 'analyze' || mode === 'parse'
     ? (userMessage || '')
     : 'Dame las sugerencias de alimentos para completar mis macros de hoy.';
 
