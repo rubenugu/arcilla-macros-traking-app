@@ -45,6 +45,9 @@ REGLAS:
 - Para artículos como huevos o plátanos indicados en unidades, usa el peso unitario de la base de datos.
 - Los valores deben ser números (sin unidades), redondeados a 1 decimal.
 - El campo "fuente" debe ser "USDA" si el dato proviene de la base de datos, o "IA" si fue estimado.
+- NUNCA crear un ítem para la preparación completa (licuado, smoothie, ensalada, guisado, etc.). Solo listar los ingredientes individuales como ítems separados.
+- Los "totales" deben ser la suma exacta de los ítems individuales, sin contar nada más.
+- Conversiones de medidas domésticas para ingredientes SECOS: 1 taza de avena/cereal en hojuelas ≈ 80g; 1 taza de arroz crudo ≈ 185g; 1 taza de harina ≈ 120g. NO usar 240g para ingredientes secos — 240ml es solo para líquidos.
 
 ${USDA_DB}
 
