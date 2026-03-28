@@ -1997,8 +1997,98 @@ function attachEvents() {
   });
 }
 
+/* ===== DEMO SEED ===== */
+function seedDemoData() {
+  try {
+    if (getPieces().length > 0) return; // already seeded
+
+    // Use DEFAULTS for piece generation — does NOT create a profile,
+    // so onboarding still shows normally on first launch
+    const targets = DEFAULTS;
+
+  // 7 days of macro data — all ≥90% to qualify
+  const demoDays = [
+    { prot:148, carbs:415, fat:62,  cal:2750, lastHour:20 },
+    { prot:152, carbs:430, fat:68,  cal:2850, lastHour:21 },
+    { prot:146, carbs:455, fat:65,  cal:2910, lastHour:19 },
+    { prot:155, carbs:440, fat:70,  cal:2940, lastHour:22 },
+    { prot:150, carbs:410, fat:63,  cal:2800, lastHour:20 },
+    { prot:160, carbs:460, fat:67,  cal:2990, lastHour:18 },
+    { prot:147, carbs:453, fat:66,  cal:2990, lastHour:21 },
+  ];
+
+  const foods = [
+    ['Pechuga de pollo 200g con arroz integral', 'Avena 100g con leche y plátano', 'Proteína whey con leche'],
+    ['Salmón 180g con camote y brócoli', 'Yogur griego con almendras', 'Pan integral con mantequilla de maní'],
+    ['Carne molida magra 200g con papa', 'Huevos revueltos 4 unidades con avena', 'Lentejas cocidas 200g'],
+    ['Atún en agua con arroz blanco 200g', 'Leche entera 500ml con avena', 'Pechuga 150g con frijoles negros'],
+    ['Salmón cocido 200g con arroz', 'Yogur griego 170g con plátano', 'Proteína whey con avena 50g'],
+    ['Pollo 250g con camote 200g', 'Huevos 3 con pan integral 2 rebanadas', 'Atún con aguacate y arroz'],
+    ['Carne molida 200g con espinaca', 'Avena 120g con leche y manzana', 'Queso fresco con pan integral'],
+  ];
+
+  const today = new Date();
+  const pieces = [];
+  const closedDays = getClosedDays();
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - (6 - i));
+    const dateStr = d.toISOString().slice(0,10);
+    const day = demoDays[i];
+    const dayFoods = foods[i];
+    const streak = i + 1;
+
+    // Add food logs split across 3 meals
+    const splits = [0.35, 0.40, 0.25];
+    splits.forEach((frac, mi) => {
+      const h = 7 + mi * 6;
+      const mTime = `${String(h).padStart(2,'0')}:00`;
+      addLog({
+        id: crypto.randomUUID(),
+        date: dateStr,
+        time: mTime,
+        dayOfWeek: DAYS[d.getDay()],
+        food: dayFoods[mi],
+        calories: Math.round(day.cal  * frac),
+        protein:  parseFloat((day.prot  * frac).toFixed(1)),
+        carbs:    parseFloat((day.carbs * frac).toFixed(1)),
+        fat:      parseFloat((day.fat   * frac).toFixed(1)),
+        source: 'Manual', items: []
+      });
+    });
+
+    // Mark day closed
+    if (!closedDays.includes(dateStr)) closedDays.push(dateStr);
+
+    const protPct  = Math.round(day.prot  / targets.protein * 100);
+    const carbsPct = Math.round(day.carbs / targets.carbs   * 100);
+    const fatPct   = Math.round(day.fat   / targets.fat     * 100);
+
+    const params = CeramicGen.calcParams(
+      { protPct, carbsPct, fatPct }, targets, streak, dateStr, day.lastHour
+    );
+    const rarity = CeramicGen.calcRarity(protPct, carbsPct, fatPct, streak);
+    const svgStr = CeramicGen.toSVGString(params);
+
+    pieces.push({
+      id: crypto.randomUUID(),
+      date: dateStr, rarity,
+      svgParams: params, svgCache: svgStr,
+      macroData: { consumed: { calories:day.cal, protein:day.prot, carbs:day.carbs, fat:day.fat }, targets, protPct, carbsPct, fatPct },
+      streak
+    });
+  }
+
+  safeSave(KEYS.closedDays, closedDays);
+  safeSave(KEYS.pieces, pieces);
+  safeSave(KEYS.streak, { count: 7, lastDate: today.toISOString().slice(0,10) });
+  } catch(e) { console.warn('seedDemoData:', e); }
+}
+
 /* ===== BOOTSTRAP ===== */
 document.addEventListener('DOMContentLoaded', () => {
+  seedDemoData();
   const profile = getProfile();
   if (!profile) {
     showScreen('onboarding');
