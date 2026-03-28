@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/al171/.claude/skills/ui-ux-pro-max/**)",
+      "Bash(python scripts/search.py \"minimalist light health fitness tracker dashboard mobile\" --design-system -f markdown)",
+      "Bash(python scripts/search.py \"minimalist clean white light healthcare wellness\" --design-system -f markdown)",
+      "Bash(python scripts/search.py \"warm beige sand natural wellness nutrition\" --design-system -f markdown)",
+      "Bash(python scripts/search.py \"sage green soft minimal health clean\" --design-system -f markdown)",
+      "Bash(python scripts/search.py \"minimalism light\" --domain style -n 3)",
+      "Bash(python scripts/search.py \"clean minimal neutral\" --domain color -n 3)"
+    ]
+  }
+}
