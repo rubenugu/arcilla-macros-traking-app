@@ -514,8 +514,10 @@
     </svg>
 
     <div class="welcome-btn-group">
+      <!-- DEMO DESACTIVADA — descomentar para reactivar
       <button class="btn btn-primary" id="btn-welcome-demo">Ver la demo</button>
       <div class="welcome-or">o</div>
+      -->
       <button class="btn btn-ghost" id="btn-welcome-fresh">Iniciar de cero</button>
     </div>
   </div>
@@ -1449,7 +1451,6 @@ function initOnboarding() {
     const profile = { age, height: h, weight: w, sex: 'M', activityLevel: 1.55, goal: 'volume', targets };
     saveProfile(profile);
     showScreen('app');
-    attachEvents();
     initApp();
   });
 }
@@ -2167,7 +2168,7 @@ function attachEvents() {
   });
 }
 
-/* ===== DEMO SEED ===== */
+/* ===== DEMO SEED — DESACTIVADA (descomentar función y sus llamadas para reactivar) =====
 function seedDemoData() {
   try {
     if (getPieces().length > 0) return; // already seeded
@@ -2255,31 +2256,31 @@ function seedDemoData() {
   safeSave(KEYS.streak, { count: 7, lastDate: today.toISOString().slice(0,10) });
   } catch(e) { console.warn('seedDemoData:', e); }
 }
+===== FIN DEMO SEED ===== */
 
 /* ===== BOOTSTRAP ===== */
 document.addEventListener('DOMContentLoaded', () => {
-  seedDemoData();
+  // DEMO DESACTIVADA — descomentar para reactivar
+  // seedDemoData();
+
+  attachEvents(); // llamado una sola vez aquí
 
   const profile = getProfile();
   if (profile) {
-    // Returning real user — skip welcome
-    isDemo = false;
     showScreen('app');
-    attachEvents();
     initApp();
   } else {
-    // No profile yet — show welcome choice
     showScreen('welcome');
   }
 
-  // Welcome: Ver la demo
+  /* DEMO DESACTIVADA — descomentar para reactivar
   document.getElementById('btn-welcome-demo').addEventListener('click', () => {
     isDemo = true;
-    seedDemoData(); // re-seed if cleared (idempotent)
+    seedDemoData();
     showScreen('app');
-    attachEvents();
     initApp();
   });
+  */
 
   // Welcome: Iniciar de cero
   document.getElementById('btn-welcome-fresh').addEventListener('click', () => {
